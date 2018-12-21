@@ -196,6 +196,10 @@ start:
 		/* r8 src, r2 dest, r5 max */
 
 		ldr	r0, [r8]				@ first tag size
+		ldr r4, =0xedfe0dd0			@ DTB Magic
+		cmp r0, r4
+		beq dtb
+		
 		cmp	r0, #0
 		moveq	r4, #8
 		beq	catags_empty
@@ -220,6 +224,12 @@ catags_cpy:
 		add	r5, r5, #4
 		cmp	r5, r4
 		blo	catags_cpy
+
+		/* Jump over the DTP part */
+		b no_atags_cpy
+
+dtb:
+		mov r2, r8
 
 no_atags_cpy:
 		/* Load boot arguments and jump to kexec kernel. */
