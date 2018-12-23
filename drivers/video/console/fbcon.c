@@ -1394,6 +1394,7 @@ static __inline__ void ywrap_up(struct vc_data *vc, int count)
 		p->yscroll -= p->vrows;
 	ops->var.xoffset = 0;
 	ops->var.yoffset = p->yscroll * vc->vc_font.height;
+	ops->var.reserved[2] = 1;
 	ops->var.vmode |= FB_VMODE_YWRAP;
 	ops->update_start(info);
 	scrollback_max += count;
@@ -1413,6 +1414,7 @@ static __inline__ void ywrap_down(struct vc_data *vc, int count)
 		p->yscroll += p->vrows;
 	ops->var.xoffset = 0;
 	ops->var.yoffset = p->yscroll * vc->vc_font.height;
+	ops->var.reserved[2] = 1;
 	ops->var.vmode |= FB_VMODE_YWRAP;
 	ops->update_start(info);
 	scrollback_max -= count;
@@ -1436,6 +1438,7 @@ static __inline__ void ypan_up(struct vc_data *vc, int count)
 
 	ops->var.xoffset = 0;
 	ops->var.yoffset = p->yscroll * vc->vc_font.height;
+	ops->var.reserved[2] = 1;
 	ops->var.vmode &= ~FB_VMODE_YWRAP;
 	ops->update_start(info);
 	fbcon_clear_margins(vc, 1);
@@ -1460,6 +1463,7 @@ static __inline__ void ypan_up_redraw(struct vc_data *vc, int t, int count)
 
 	ops->var.xoffset = 0;
 	ops->var.yoffset = p->yscroll * vc->vc_font.height;
+	ops->var.reserved[2] = 1;
 	ops->var.vmode &= ~FB_VMODE_YWRAP;
 	ops->update_start(info);
 	fbcon_clear_margins(vc, 1);
@@ -1484,6 +1488,7 @@ static __inline__ void ypan_down(struct vc_data *vc, int count)
 
 	ops->var.xoffset = 0;
 	ops->var.yoffset = p->yscroll * vc->vc_font.height;
+	ops->var.reserved[2] = 1;
 	ops->var.vmode &= ~FB_VMODE_YWRAP;
 	ops->update_start(info);
 	fbcon_clear_margins(vc, 1);
@@ -1508,6 +1513,7 @@ static __inline__ void ypan_down_redraw(struct vc_data *vc, int t, int count)
 
 	ops->var.xoffset = 0;
 	ops->var.yoffset = p->yscroll * vc->vc_font.height;
+	ops->var.reserved[2] = 1;
 	ops->var.vmode &= ~FB_VMODE_YWRAP;
 	ops->update_start(info);
 	fbcon_clear_margins(vc, 1);
@@ -2255,6 +2261,7 @@ static int fbcon_switch(struct vc_data *vc)
 
 	if (!fbcon_is_inactive(vc, info)) {
 	    ops->var.xoffset = ops->var.yoffset = p->yscroll = 0;
+		ops->var.reserved[2] = 1;
 	    ops->update_start(info);
 	}
 
@@ -2826,6 +2833,7 @@ static int fbcon_scrolldelta(struct vc_data *vc, int lines)
 
 	ops->var.xoffset = 0;
 	ops->var.yoffset = offset * vc->vc_font.height;
+	ops->var.reserved[2] = 1;
 	ops->update_start(info);
 
 	if (!scrollback_current)
@@ -2895,6 +2903,7 @@ static void fbcon_modechanged(struct fb_info *info)
 
 		if (!fbcon_is_inactive(vc, info)) {
 		    ops->var.xoffset = ops->var.yoffset = p->yscroll = 0;
+			ops->var.reserved[2] = 1;
 		    ops->update_start(info);
 		}
 
