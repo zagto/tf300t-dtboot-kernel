@@ -45,6 +45,8 @@
 #include <linux/memblock.h>
 #include <linux/spi-tegra.h>
 #include <linux/rfkill-gpio.h>
+#include <linux/proc_fs.h>
+#include <asm/uaccess.h>
 
 #include <sound/wm8903.h>
 #include <sound/max98095.h>
@@ -1887,6 +1889,45 @@ static void ME301T_HWid_init(void)
         printk("%s: HW_ID[2:0] = (%d, %d, %d)\n", __func__, gpio_get_value(TEGRA_GPIO_PS5), \
                 gpio_get_value(TEGRA_GPIO_PQ6), gpio_get_value(TEGRA_GPIO_PQ1));
 }
+
+static const char *const tegra3_project_names[] = {
+	"tegra30-asus-tf201", // 0
+	"tegra30-asus-p1801", // 1
+	"tegra30-asus-tf300t", // 2
+	"tegra30-asus-tf300tg", // 3
+	"tegra30-asus-tf700t", // 4
+	"tegra30-asus-tf300tl", // 5
+	"unknown(6)", // 6
+	"tegra30-asus-tf500t", // 7
+	"unknown(6)", // 8
+	"unknown(6)", // 9
+	"unknown(6)", // 10
+	"tegra30-asus-me301t", // 11
+	"tegra30-asus-me301tl", // 12
+	"tegra30-asus-me570t", // 13  (Nexus 7?)
+};
+
+static int project_name_show(struct seq_file *file, void *v)
+{
+	u32 project_id = tegra3_get_project_id();
+	const char *name = tegra3_project_names[project_id];
+	seq_puts(file, name);
+	return 0;
+}
+
+static int project_name_open(struct inode *inode, struct file *file) {
+    single_open(file, project_name_show, NULL);
+    return 0;
+}
+
+static struct file_operations project_name_operations = {
+    .owner = THIS_MODULE,
+    .open    = project_name_open,
+    .read    = seq_read,
+    .llseek  = seq_lseek,
+    .release = single_release
+};
+
 static void __init tegra_cardhu_init(void)
 {
         u32 project_info = tegra3_get_project_id();
@@ -1939,6 +1980,8 @@ static void __init tegra_cardhu_init(void)
 #ifdef CONFIG_TEGRA_WDT_RECOVERY
 	tegra_wdt_recovery_init();
 #endif
+
+	proc_create("tegra3_project", 0444, NULL, &project_name_operations);
 }
 
 static void __init tegra_cardhu_reserve(void)
